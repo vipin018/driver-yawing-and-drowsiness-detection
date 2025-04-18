@@ -2,93 +2,127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buzzer Control</title>
+    <title>Driver Alert Dashboard</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffcc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
 
         h1 {
-            margin-top: 30px;
-            color: #333;
+            text-shadow: 0 0 15px #00ffcc;
+            color: #00ffcc;
+            margin-bottom: 20px;
+            font-size: 2rem;
         }
 
-        #video-container {
-            margin: 30px auto;
-            width: 80%;
-            max-width: 600px;
-            border: 3px solid #ccc;
-            border-radius: 10px;
+        .dashboard {
+            background-color: #111;
+            border: 2px solid #00ffcc;
+            border-radius: 15px;
+            box-shadow: 0 0 25px #00ffcc77;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .video-frame {
+            border: 5px solid #00ffcc;
+            border-radius: 12px;
             overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px #00ffcc88;
         }
 
-        video {
-            width: 100%;
-            height: auto;
-            display: block;
+        img {
+            width: 640px;
+            height: 480px;
         }
 
-        button {
-            padding: 12px 30px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
+        .status-box {
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            border-radius: 10px;
+            background-color: #222;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 15px #00ffcc55;
+            transition: all 0.3s ease-in-out;
         }
 
-        button:hover {
-            background-color: #388e3c;
+        .status-box.alert {
+            background-color: #ff0033;
+            border-color: #ff0033;
+            color: #fff;
+            box-shadow: 0 0 20px #ff0033;
+            animation: blink 1s infinite;
         }
 
-        #status {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #d32f2f;
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @media (max-width: 768px) {
+            img {
+                width: 100%;
+                height: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🔊 Buzzer Control Dashboard</h1>
+    <h1>Driver Monitoring Dashboard</h1>
 
-    <div id="video-container">
-        <!-- Local camera feed with video element -->
-        <video id="video-feed" autoplay loop>
-            <source src="/video_feed" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <div class="dashboard">
+        <div class="video-frame">
+            <img src="{{ url_for('video_feed') }}" alt="Live Video Feed">
+        </div>
+
+        <div id="status" class="status-box">
+            Status: Normal Driving
+        </div>
     </div>
 
-    <button onclick="triggerBuzzer()">Activate Buzzer</button>
-
-    <div id="status">Status: Idle</div>
-
     <script>
-        function triggerBuzzer() {
-            fetch('/trigger_buzzer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const statusEl = document.getElementById('status');
-                statusEl.innerText = `Status: ${data.status}`;
-                statusEl.style.color = data.status.toLowerCase().includes("activated") ? "green" : "red";
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('status').innerText = "Status: Error communicating with server";
-            });
+        function updateStatus() {
+            fetch('/get_buzzer_status')
+                .then(res => res.text())
+                .then(status => {
+                    const statusBox = document.getElementById('status');
+                    statusBox.classList.remove("alert");
+
+                    switch(status) {
+                        case "both":
+                            statusBox.textContent = "⚠️ Drowsiness + Yawning Detected!";
+                            statusBox.classList.add("alert");
+                            break;
+                        case "drowsy":
+                            statusBox.textContent = "⚠️ Drowsiness Detected!";
+                            statusBox.classList.add("alert");
+                            break;
+                        case "yawn":
+                            statusBox.textContent = "⚠️ Yawning Detected!";
+                            statusBox.classList.add("alert");
+                            break;
+                        default:
+                            statusBox.textContent = "Status: Normal Driving";
+                            break;
+                    }
+                });
         }
+
+        setInterval(updateStatus, 1000);
     </script>
 </body>
 </html>
