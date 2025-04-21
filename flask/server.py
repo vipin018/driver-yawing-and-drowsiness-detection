@@ -7,7 +7,7 @@ from flask import Flask, render_template, Response, jsonify
 app = Flask(__name__)
 
 # Use DroidCam IP feed
-DROIDCAM_URL = "http://192.168.190.155:4747/video"
+DROIDCAM_URL = "http://192.168.1.101:4747/video"
 
 # MediaPipe setup
 mp_face_mesh = mp.solutions.face_mesh
@@ -44,6 +44,7 @@ def mouth_aspect_ratio(mouth):
 def generate_frames():
     global eye_counter, is_drowsy, is_yawning
     cap = cv2.VideoCapture(DROIDCAM_URL)
+    # cap = cv2.VideoCapture(0)
 
     while True:
         success, frame = cap.read()
@@ -118,4 +119,5 @@ def get_buzzer_status():
         return "normal"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+
