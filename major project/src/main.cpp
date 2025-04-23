@@ -1,10 +1,11 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* ssid = "Vipin's S24";            // Replace with your WiFi SSID
-const char* password = "12345678";    // Replace with your WiFi password
+const char* ssid = "Airtel_Buddys";            // Replace with your WiFi SSID
+const char* password = "buddys@123";    // Replace with your WiFi password
 
-const char* serverURL = "http://192.168.236.158:5000/get_buzzer_status"; // Flask endpoint
+const char* serverURL = "http://192.168.1.91:5000/get_buzzer_status";
+ // Flask endpoint
 
 const int buzzerPin = 13;
 
